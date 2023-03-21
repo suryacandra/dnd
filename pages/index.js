@@ -17,7 +17,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 
-const SortableItem = ({ id, title, desc }) => {
+const SortableItem = ({ id, e, data }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
 
@@ -27,15 +27,83 @@ const SortableItem = ({ id, title, desc }) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="col-span-2 grid grid-cols-2 gap-5" {...attributes} {...listeners}>
-        <div className="bg-blue-300 p-3 rounded">{title}</div>
-        <div className="bg-blue-300 p-3 rounded">{desc}</div>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="px-2 py-2 bg-blue-200 grid grid-cols-2"
+      {...attributes}
+      {...listeners}
+    >
+      <span>{data[0].id === 1 ? e.title : e.desc}</span>
+      <span>{data[1].id === 1 ? e.title : e.desc}</span>
+    </div>
+  );
+};
+
+const SortableNav = ({ id, title }) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="px-2 py-2 bg-blue-200"
+      {...attributes}
+      {...listeners}
+    >
+      {title}
+    </div>
+  );
+};
+
+
+const SortableTable = ({
+  id,
+  title,
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="px-2 py-2 bg-blue-200"
+      {...attributes}
+      {...listeners}
+    >
+      <span>{title}</span>
     </div>
   );
 };
 
 export default function Home() {
-  const [menu, setMenu] = useState([{id: 1, title: 'Iphone 1', desc: 'Hp iphone 1'}, {id: 2, title: 'Iphone 2', desc: 'Hp iphone 2'}, {id: 3, title: 'Iphone 3', desc: 'Hp iphone 3'}]);
+  const [menu, setMenu] = useState([
+    { id: 1, title: "Iphone 1", desc: "This is iphone 1" },
+    { id: 2, title: "Iphone 2", desc: "And this is iphone 2" },
+    { id: 3, title: "Iphone 3", desc: "For this is iphone 3" },
+  ]);
+
+  const [nav, setNav] = useState([
+    { id: 1, title: "Product 1" },
+    { id: 2, title: "Product 2" },
+    { id: 3, title: "Product 3" },
+  ]);
+  const [head, setHead] = useState([
+    { id: 1, title: "Title" },
+    { id: 2, title: "Desc" },
+  ]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -44,34 +112,86 @@ export default function Home() {
     })
   );
 
-  function handleDragEnd(event) {
+  function handleDragEnd(event, fn) {
     const { active, over } = event;
+    console.log(active)
     if (active.id !== over.id) {
-      setMenu((items) => {
-        const oldIndex = items.map(e => e.id).indexOf(active.id);
-        const newIndex = items.map(e => e.id).indexOf(over.id);
+      fn((items) => {
+        const oldIndex = items.map((e) => e.id).indexOf(active.id);
+        const newIndex = items.map((e) => e.id).indexOf(over.id);
         return arrayMove(items, oldIndex, newIndex);
       });
     }
   }
+
+  function handleDragCol(event, fn1) {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      fn1((items) => {
+        const oldIndex = items.map((e) => e.id).indexOf(active.id);
+        const newIndex = items.map((e) => e.id).indexOf(over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  }
+
+  console.log(head);
 
   return (
     <div className="flex w-full h-full">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
+        onDragEnd={(e) => handleDragEnd(e, setNav)}
       >
-        <SortableContext items={menu} strategy={verticalListSortingStrategy}>
-          <div className="grid grid-cols-2 p-3 gap-5 w-full">
-            <span className="bg-slate-500 rounded px-2 py-1">Title</span>
-            <span className="bg-slate-500 rounded px-2 py-1">Desc</span>
-            {menu?.map((e, i) => (
-              <SortableItem key={i} id={e.id} title={e.title} desc={e.desc} />
+        <SortableContext items={nav} strategy={verticalListSortingStrategy}>
+          <div className="flex flex-col gap-2 p-5 bg-slate-400">
+            {nav?.map((e, i) => (
+              <SortableNav key={i} id={e.id} title={e.title} />
             ))}
           </div>
         </SortableContext>
       </DndContext>
+
+      <div className="flex flex-col gap-2">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={(e) => handleDragCol(e, setHead)}
+        >
+          <SortableContext items={head} strategy={verticalListSortingStrategy}>
+            <div className="grid grid-cols-2">
+              {head?.map((e, i) => (
+                <SortableTable
+                  key={i}
+                  id={e.id}
+                  title={e.title}
+                  menu={menu}
+                  setMenu={setMenu}
+                  sensors={sensors}
+                  handleDragEnd={handleDragEnd}
+                />
+              ))}
+            </div>
+            <div className="flex flex-col gap-2">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={(e) => handleDragEnd(e, setMenu)}
+              >
+                <SortableContext
+                  items={menu}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {menu.map((e, i) => (
+                    <SortableItem key={i} id={e.id} data={head} e={e} />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            </div>
+          </SortableContext>
+        </DndContext>
+      </div>
     </div>
   );
 }
