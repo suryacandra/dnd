@@ -62,11 +62,7 @@ const SortableNav = ({ id, title }) => {
   );
 };
 
-
-const SortableTable = ({
-  id,
-  title,
-}) => {
+const SortableTable = ({ id, title }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
 
@@ -114,7 +110,7 @@ export default function Home() {
 
   function handleDragEnd(event, fn) {
     const { active, over } = event;
-    console.log(active)
+    console.log(active);
     if (active.id !== over.id) {
       fn((items) => {
         const oldIndex = items.map((e) => e.id).indexOf(active.id);
@@ -135,62 +131,66 @@ export default function Home() {
     }
   }
 
-  console.log(head);
-
   return (
-    <div className="flex w-full h-full">
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={(e) => handleDragEnd(e, setNav)}
-      >
-        <SortableContext items={nav} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-2 p-5 bg-slate-400">
-            {nav?.map((e, i) => (
-              <SortableNav key={i} id={e.id} title={e.title} />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
-
-      <div className="flex flex-col gap-2">
+    <div className="flex flex-col w-full h-full">
+      <p>Drag and drop only support in desktop with mouse</p>
+      <div className="flex">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
-          onDragEnd={(e) => handleDragCol(e, setHead)}
+          onDragEnd={(e) => handleDragEnd(e, setNav)}
         >
-          <SortableContext items={head} strategy={verticalListSortingStrategy}>
-            <div className="grid grid-cols-2">
-              {head?.map((e, i) => (
-                <SortableTable
-                  key={i}
-                  id={e.id}
-                  title={e.title}
-                  menu={menu}
-                  setMenu={setMenu}
-                  sensors={sensors}
-                  handleDragEnd={handleDragEnd}
-                />
+          <SortableContext items={nav} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col gap-2 p-5 bg-slate-400">
+              {nav?.map((e, i) => (
+                <SortableNav key={i} id={e.id} title={e.title} />
               ))}
-            </div>
-            <div className="flex flex-col gap-2">
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={(e) => handleDragEnd(e, setMenu)}
-              >
-                <SortableContext
-                  items={menu}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {menu.map((e, i) => (
-                    <SortableItem key={i} id={e.id} data={head} e={e} />
-                  ))}
-                </SortableContext>
-              </DndContext>
             </div>
           </SortableContext>
         </DndContext>
+
+        <div className="flex flex-col gap-2">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={(e) => handleDragCol(e, setHead)}
+          >
+            <SortableContext
+              items={head}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="grid grid-cols-2">
+                {head?.map((e, i) => (
+                  <SortableTable
+                    key={i}
+                    id={e.id}
+                    title={e.title}
+                    menu={menu}
+                    setMenu={setMenu}
+                    sensors={sensors}
+                    handleDragEnd={handleDragEnd}
+                  />
+                ))}
+              </div>
+              <div className="flex flex-col gap-2">
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={(e) => handleDragEnd(e, setMenu)}
+                >
+                  <SortableContext
+                    items={menu}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {menu.map((e, i) => (
+                      <SortableItem key={i} id={e.id} data={head} e={e} />
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              </div>
+            </SortableContext>
+          </DndContext>
+        </div>
       </div>
     </div>
   );
