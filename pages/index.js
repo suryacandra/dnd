@@ -72,10 +72,6 @@ export default function Home() {
           </div>
         </SortableContext>
       </DndContext>
-      <div className="w-full p-5 text-white">
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eveniet,
-        saepe.
-      </div>
     </div>
   );
 }
